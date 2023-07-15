@@ -18,3 +18,5 @@
 api
 .vscode
 .DS_Store
+coverage.out
+cover.html
