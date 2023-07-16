@@ -57,38 +57,29 @@ jobs:
           name: api
           path: artifacts
   deliver:
-    name: Release App
+    name: Release
     needs: build
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v2
-      - name: Download Artifact
+      - name: Download binary # <4>
         uses: actions/download-artifact@v2
         with:
           name: api
-      - name: Create Release #
+      - name: Changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+      - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          draft: true
-          prerelease: true
           body: |
-            Changes in this Release
-            - Added new feature
-            - Fixed bug
-            - Experimental feature
-      - name: Upload Release Asset #
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: api
-          asset_name: api
-          asset_content_type: application/octet-stream
+            ${{ steps.Changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
