@@ -30,7 +30,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
           name: reports
-          path: ch3/reports  # Do not include ch3
+          path: reports
   build:
     name: Build App
     runs-on: ubuntu-latest #
@@ -54,5 +54,5 @@ jobs:
     - name: Archive
       uses: actions/upload-artifact@v2
       with:
-          name: reports
-          path: reports
+          name: api
+          path: artifacts
