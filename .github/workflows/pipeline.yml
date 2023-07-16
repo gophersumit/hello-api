@@ -56,3 +56,39 @@ jobs:
       with:
           name: api
           path: artifacts
+  deliver:
+    name: Release App
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: api
+      - name: Create Release #
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: true
+          body: |
+            Changes in this Release
+            - Added new feature
+            - Fixed bug
+            - Experimental feature
+      - name: Upload Release Asset #
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: api
+          asset_name: api
+          asset_content_type: application/octet-stream
